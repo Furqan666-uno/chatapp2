@@ -1,0 +1,46 @@
+{% extends 'chatapp/base.html' %}
+{% block body %}
+
+<div class="max-w-lg mx-auto mt-20 bg-white p-8 rounded-2xl shadow-xl">
+  <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Login to Your Account</h2>
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+
+    {% for field in form %}
+      <div>
+        <label class="block text-gray-700 font-medium mb-2" for="{{ field.id_for_label }}">
+          {{ field.label }}
+        </label>
+        {{ field }}
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            const input = document.getElementById("{{ field.id_for_label }}");
+            if (input) {
+              input.classList.add(
+                "w-full", "px-4", "py-3", "border", "border-gray-300",
+                "rounded-md", "focus:outline-none", "focus:ring-2",
+                "focus:ring-blue-500", "focus:border-transparent",
+                "text-base"
+              );
+            }
+          });
+        </script>
+        {% if field.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ field.errors.0 }}</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition">
+      Login
+    </button>
+  </form>
+
+  <p class="text-center text-sm text-gray-600 mt-6">
+    Don't have an account?
+    <a href="{% url 'signup' %}" class="text-blue-600 hover:underline">Sign up here</a>
+  </p>
+</div>
+
+{% endblock %}

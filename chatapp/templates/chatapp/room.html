@@ -1,0 +1,129 @@
+{% extends "chatapp/base.html" %}
+{% block body %}
+
+<!-- Chat Room Header -->
+<div class="text-center mt-6 mb-4 text-2xl font-bold text-blue-800">
+  {{ chatroom.name }}
+</div>
+
+<!-- Message Container -->
+<div id="message-container" class="max-w-4xl mx-auto mb-28 px-4 overflow-y-auto h-[70vh]">
+  <div id="chat-messages" class="space-y-6">
+    {% for message in messages %}
+    <div class="{% if message.user == request.user %}flex justify-end{% else %}flex justify-start{% endif %}" id="message-{{ message.id }}">
+      <div class="{% if message.user == request.user %}bg-blue-500 text-white{% else %}bg-gray-100 text-gray-800{% endif %} w-fit max-w-lg p-4 rounded-xl shadow-md relative group">
+        <div class="text-sm font-semibold mb-1">
+          {{ message.user.username }}
+        </div>
+        <div>{{ message.message_content }}</div>
+        <div class="text-xs text-right mt-2 text-gray-300">
+          {{ message.date|date:"M d, H:i" }}
+        </div>
+
+        {% if message.user == request.user %}
+        <button type="button"
+        onclick="deleteMessage('{{ message.id }}')"
+        class="absolute top-1 right-2 text-xs text-red-300 hover:text-red-600 opacity-0 group-hover:opacity-100 transition">
+        ✖
+        </button>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Fixed Message Input -->
+<div class="fixed bottom-0 inset-x-0 bg-white border-t shadow-md p-4">
+  <form method="post" class="max-w-4xl mx-auto flex items-center gap-4">
+    {% csrf_token %}
+    <input id="message-input" type="text" name="message" placeholder="Type your message..." required
+      class="flex-1 px-4 py-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400">
+    <button id="send-button" type="submit"
+      class="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition">Send</button>
+  </form>
+</div>
+
+<!-- Hidden JSON Data -->
+<script id="json-chatroomname" type="application/json">{{ room_slug_json|safe }}</script>
+<script id="json-username" type="application/json">{{ username|safe }}</script>
+
+<!-- WebSocket Logic -->
+<script>
+    const chatRoomName = JSON.parse(document.getElementById('json-chatroomname').textContent);
+    const username = JSON.parse(document.getElementById('json-username').textContent);
+    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/' + chatRoomName + '/');
+
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data.message && data.username) {
+        const html = `
+            <div class="flex justify-${data.username === username ? 'end' : 'start'}">
+            <div class="${data.username === username ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-800'} w-fit max-w-lg p-4 rounded-xl shadow-md mt-4">
+                <div class="text-sm font-semibold mb-1">${data.username}</div>
+                <div>${data.message}</div>
+                <div class="text-xs text-right mt-2 text-gray-300">Now</div>
+            </div>
+            </div>`;
+        document.getElementById('chat-messages').innerHTML += html;
+        scrollToBottom();
+        } 
+        else {
+        alert("Missing message or username");
+        }
+    };
+
+    chatSocket.onerror = function (e) {
+        console.error("WebSocket error", e);
+    };
+
+    chatSocket.onclose = function (e) {
+        console.log("WebSocket closed");
+    };
+
+    document.getElementById('send-button').onclick = function (e) {
+        e.preventDefault();
+        const input = document.getElementById('message-input');
+        const message = input.value.trim();
+        if (!message) return;
+        chatSocket.send(JSON.stringify({
+        'message': message,
+        'username': username,
+        'room': chatRoomName
+        }));
+        input.value = "";
+    };
+
+    function scrollToBottom() {
+        const container = document.getElementById("message-container");
+        container.scrollTop = container.scrollHeight;
+    }
+
+    scrollToBottom(); // Scroll on page load
+
+    function deleteMessage(messageId) {
+        if (!confirm("Are you sure you want to delete this message?")) return;
+
+        fetch(`/rooms/message/${messageId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+        })
+        .then(response => response.json())
+        .then(data => {
+        if (data.status === 'success') {
+            const msgEl = document.getElementById(`message-${messageId}`);
+            if (msgEl) msgEl.remove();
+        } 
+        else {
+            alert("Failed to delete message.");
+        }
+        })
+        .catch(err => {
+        console.error("Deletion error", err);
+        });
+    }
+</script>
+
+{% endblock %}

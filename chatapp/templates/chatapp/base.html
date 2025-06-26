@@ -1,0 +1,55 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Chats App</title>
+</head>
+<body class="bg-gray-50">
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow-md">
+    <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row md:items-center md:justify-between">
+      <!-- Logo and Brand -->
+      <div class="flex items-center justify-between mb-3 md:mb-0">
+        <a href="{% url 'index' %}" class="flex items-center space-x-3">
+          <img src="https://cdn4.iconfinder.com/data/icons/ui-marketplace-1-0-flat/20/20_comment-128.png" class="h-10 w-10" alt="Logo" />
+          <span class="text-2xl font-bold text-gray-800">ChatsApp</span>
+        </a>
+      </div>
+
+    <!-- Navigation Links + Room Creation -->
+    <div class="flex flex-col md:flex-row md:items-center space-y-3 md:space-y-0 md:space-x-6">
+    <a href="{% url 'index' %}" class="text-gray-700 font-medium hover:text-blue-600 transition">Rooms</a>
+
+    {% if user.is_authenticated %}
+        <span class="text-gray-700">Hi, {{ user.username }}</span>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="text-red-600 font-medium hover:text-red-800 transition">Logout</button>
+        </form>
+    {% else %}
+        <a href="{% url 'login' %}" class="text-blue-600 font-medium hover:text-blue-800 transition">Login</a>
+    {% endif %}
+
+    {% if on_index %}
+        <form method="post" action="{% url 'create_room' %}" class="mt-4 flex space-x-2">
+        {% csrf_token %}
+        <input type="text" name="room_name" placeholder="Enter new room name" required
+                class="px-3 py-2 border rounded-md w-1/2" />
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+            Create Room
+        </button>
+        </form>
+    {% endif %}
+    </div>
+
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  {% block body %}
+  {% endblock %}
+</body>
+</html>

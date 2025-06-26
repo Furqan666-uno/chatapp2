@@ -1,0 +1,34 @@
+{% extends 'chatapp/base.html' %}
+{% block body %}
+
+<div class="max-w-4xl mx-auto my-10">
+  <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">Your Chat Rooms</h1>
+
+  {% if chatrooms %}
+    <div class="space-y-4">
+      {% for chatroom in chatrooms %}
+        <div class="flex justify-between items-center bg-white shadow-md rounded-lg p-6 hover:shadow-lg transition">
+          <div>
+            <a href="{% url 'chatroom' chatroom.slug %}" class="text-xl font-semibold text-blue-700 hover:underline">
+              {{ chatroom.name }}
+            </a>
+            <p class="text-sm text-gray-500">Created by: {{ chatroom.created_by.username }}</p>
+          </div>
+
+          {% if request.user == chatroom.created_by %}
+          <form method="post" action="{% url 'delete_room' chatroom.slug %}" onsubmit="return confirm('Are you sure you want to delete this room?');">
+            {% csrf_token %}
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-md">
+              Delete
+            </button>
+          </form>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-gray-500">You haven’t created any chat rooms yet. Use the form above to get started.</p>
+  {% endif %}
+</div>
+
+{% endblock %}
