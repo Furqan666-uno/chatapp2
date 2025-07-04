@@ -2,9 +2,9 @@
 
 ![image](https://github.com/user-attachments/assets/dde1ce14-9a51-451e-87fe-225a24446f36)
 
-A real-time chat application built with Django, Channels, WebSockets, and Bootstrap. Users can create chat rooms, send/receive messages instantly, and manage chat sessions securely.
+# A real-time chat application built with Django, Channels, WebSockets, and Bootstrap. Users can create chat rooms, send/receive messages instantly, and manage chat sessions securely.
 
-🚀 Features:-
+# 🚀 Features:-
 🔐 User authentication (Login/Register)
 💬 Real-time chat with WebSockets
 🏠 Create & join unique chat rooms
@@ -12,7 +12,7 @@ A real-time chat application built with Django, Channels, WebSockets, and Bootst
 📱 Responsive UI with Bootstrap
 🌐 Multi-user chat support
 
-🛠️ Tech Stack
+# 🛠️ Tech Stack
 Backend: Django, Django Channels, ASGI, Redis
 Frontend: HTML, CSS, JavaScript, Bootstrap
 WebSocket Layer: Channels & Daphne
